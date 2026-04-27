@@ -37,9 +37,9 @@ def register_view(request):
         
         for error in error_messages:
             messages.error(request, error)
-        return render(request, 'core/register.html', {'input_values': request.POST}) # Pass back input values
+        return render(request, 'register.html', {'input_values': request.POST}) # Pass back input values
 
-    return render(request, 'core/register.html')
+    return render(request, 'register.html')
 
 def login_view(request):
     if request.user.is_authenticated:
@@ -60,7 +60,7 @@ def login_view(request):
             messages.error(request, "Invalid username or password.")
             return render(request, 'app/login.html', {'username': username})
 
-    return render(request, 'core/login.html')
+    return render(request, 'login.html')
 
 @login_required
 def logout_view(request):
@@ -148,7 +148,7 @@ def home_view(request):
         'search_query': search_query, 
         'searched_user_info': searched_user_info
     }
-    return render(request, 'core/home.html', context)
+    return render(request, 'home.html', context)
 
 @login_required
 def profile_view(request):
