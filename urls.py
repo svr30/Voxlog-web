@@ -1,14 +1,13 @@
-# core/urls.py
-from django.urls import path
-from . import views
+# audio_social/audio_social/urls.py
+from django.contrib import admin
+from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
-    path('', views.home_view, name='home'),
-    path('register/', views.register_view, name='register'),
-    path('login/', views.login_view, name='login'),
-    path('logout/', views.logout_view, name='logout'),
-    path('profile/', views.profile_view, name='profile'),
-    path('add_post/', views.add_post_view, name='add_post'),
-    path('post/<int:post_id>/add_comment/', views.add_comment_view, name='add_comment'),
-    path('post/<int:post_id>/like/', views.like_post_view, name='like_post'), # New URL
+    path('admin/', admin.site.urls),
+    path('', include('core.urls')),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
