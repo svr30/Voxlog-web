@@ -122,7 +122,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
-    BASE_DIR / "core/static", # So Django can find our app's static files
+    BASE_DIR / "app/static", # So Django can find our app's static files
 ]
 
 # Media files (User uploaded content)
