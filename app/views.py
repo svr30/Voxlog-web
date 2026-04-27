@@ -58,7 +58,7 @@ def login_view(request):
             return redirect(next_url or 'home')
         else:
             messages.error(request, "Invalid username or password.")
-            return render(request, 'core/login.html', {'username': username})
+            return render(request, 'app/login.html', {'username': username})
 
     return render(request, 'core/login.html')
 
@@ -75,7 +75,7 @@ def logout_view(request):
 #     posts = Post.objects.all().select_related('user__profile') \
 #                               .prefetch_related('comments__user__profile', 'likes')
 #     # Added __profile to user for easier access and prefetch 'likes'
-#     return render(request, 'core/home.html', {'posts': posts})
+#     return render(request, 'app/home.html', {'posts': posts})
 
 
 
@@ -109,7 +109,7 @@ def logout_view(request):
 #         'search_query': search_query, # Pass the query back to prefill the search box
 #         'searched_user_info': searched_user_info
 #     }
-#     return render(request, 'core/home.html', context)
+#     return render(request, 'app/home.html', context)
 
 
 # core/views.py
@@ -153,7 +153,7 @@ def home_view(request):
 @login_required
 def profile_view(request):
     user_posts = Post.objects.filter(user=request.user).prefetch_related('comments__user')
-    return render(request, 'core/profile.html', {'user_posts': user_posts})
+    return render(request, 'app/profile.html', {'user_posts': user_posts})
 
 @login_required
 def add_post_view(request):
@@ -182,9 +182,9 @@ def add_post_view(request):
         
         for error in error_messages:
             messages.error(request, error)
-        return render(request, 'core/add_post.html', {'caption': caption}) # Pass back caption
+        return render(request, 'app/add_post.html', {'caption': caption}) # Pass back caption
 
-    return render(request, 'core/add_post.html')
+    return render(request, 'app/add_post.html')
 
 @login_required
 def add_comment_view(request, post_id):
@@ -284,7 +284,7 @@ def profile_view(request):
             'current_username': new_username or user.username,
             'current_email': new_email or user.email,
         }
-        return render(request, 'core/profile.html', context)
+        return render(request, 'app/profile.html', context)
 
     context = {
         'user_posts': user_posts,
@@ -292,7 +292,7 @@ def profile_view(request):
         'current_username': user.username,
         'current_email': user.email,
     }
-    return render(request, 'core/profile.html', context)
+    return render(request, 'app/profile.html', context)
 
 
 @login_required
