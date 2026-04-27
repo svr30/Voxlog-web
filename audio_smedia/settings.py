@@ -25,7 +25,12 @@ SECRET_KEY = 'django-insecure-i5@f-)cf-zdh-^&=1ep)506m#qsenf-p**r2y%#ef4h$rn+9sm
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'voxlogweb.onrender.com',
+    '.onrender.com',
+    'localhost',
+    '127.0.0.1'
+]
 
 
 # Application definition
