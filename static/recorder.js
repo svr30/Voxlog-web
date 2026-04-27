@@ -1,4 +1,4 @@
-// core/static/core/js/recorder.js
+// core/static/app/js/recorder.js
 document.addEventListener('DOMContentLoaded', () => {
     const recordButton = document.getElementById('recordButton');
     const stopButton = document.getElementById('stopButton');
