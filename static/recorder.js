@@ -1,4 +1,5 @@
 // core/static/app/js/recorder.js
+console.log("Recorder JS Loaded");
 document.addEventListener('DOMContentLoaded', () => {
     const recordButton = document.getElementById('recordButton');
     const stopButton = document.getElementById('stopButton');
@@ -96,7 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 audioFileInput.files = dataTransfer.files;
 
                 recordingStatus.textContent = "Recording selected for upload.";
-                messages.success(request, "Recording selected and will be used for the post."); // This won't work, JS can't call Django messages
+                
                 alert("Recording selected! It will be uploaded when you submit the post.");
             } else {
                 recordingStatus.textContent = "No recording available to use.";
