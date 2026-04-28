@@ -1,76 +1,50 @@
 {% extends 'base.html' %}
 {% block title %}Add New Post - VoxLog{% endblock %}
 
-{% block extra_head %}
-<style>
-    #recordButton.recording, #stopButton.recording {
-        animation: pulse 1.5s infinite;
-    }
-    @keyframes pulse {
-        0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
-        70% { box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
-        100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
-    }
-    #audioPlayback { margin-top: 1rem; }
-</style>
-{% endblock %}
-
 {% block content %}
 <div class="form-container">
     <h2 class="text-center mb-4">
         <i class="bi bi-mic-plus-fill"></i> Create New Audio Post
     </h2>
-    
+
     <div class="mb-3 p-3 border rounded bg-light">
         <h5 class="text-center">Record Audio</h5>
 
-        <div class="d-flex justify-content-around align-items-center my-3">
-            
-            <!-- ✅ FIXED BUTTON -->
+        <div class="d-flex justify-content-around my-3">
+
+            <!-- ✅ RECORD BUTTON -->
             <button id="recordButton" class="btn btn-danger btn-lg">
                 <i class="bi bi-mic-fill"></i> Record
             </button>
 
+            <!-- ✅ STOP BUTTON -->
             <button id="stopButton" class="btn btn-secondary btn-lg" disabled>
                 <i class="bi bi-stop-fill"></i> Stop
             </button>
 
         </div>
 
-        <div id="timer" class="text-center fw-bold mb-2">00:00</div>
+        <div id="timer" class="text-center fw-bold">00:00</div>
 
-        <div id="audioPlaybackContainer" class="text-center" style="display:none;">
+        <div id="audioPlaybackContainer" style="display:none;">
             <audio id="audioPlayback" controls></audio>
-            <button id="useRecordingButton" class="btn btn-sm btn-success mt-2">
+            <button id="useRecordingButton" class="btn btn-success mt-2">
                 Use this recording
             </button>
         </div>
 
-        <p id="recordingStatus" class="text-center text-muted mt-2"></p>
+        <p id="recordingStatus" class="text-center text-muted"></p>
     </div>
-    
-    <hr>
 
-    <h5 class="text-center my-3">Or Upload an Audio File</h5>
-
-    <form method="post" action="{% url 'add_post' %}" enctype="multipart/form-data">
+    <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
 
-        <div class="mb-3">
-            <label for="caption" class="form-label">Caption (Optional)</label>
-            <input type="text" class="form-control" id="caption" name="caption" value="{{ caption }}">
-        </div>
+        <input type="text" name="caption" class="form-control mb-2" placeholder="Caption">
 
-        <div class="mb-3">
-            <label for="audio_file" class="form-label">Audio File</label>
-            <input type="file" class="form-control" id="audio_file" name="audio_file" accept="audio/*">
-            <small class="form-text text-muted">
-                Accepted formats: MP3, WAV, OGG, M4A. Max 10MB.
-            </small>
-        </div>
+        <input type="file" id="audio_file" name="audio_file" class="form-control">
 
-        <button type="submit" class="btn btn-primary-custom w-100 mt-3">
-            <i class="bi bi-cloud-upload-fill"></i> Upload Post
+        <button type="submit" class="btn btn-primary mt-3 w-100">
+            Upload
         </button>
     </form>
 </div>
@@ -78,5 +52,5 @@
 
 {% block extra_scripts %}
 {% load static %}
-<script src="{% static 'recorder.js' %}"></script>
+<script src="{% static 'app/js/recorder.js' %}"></script>
 {% endblock %}
