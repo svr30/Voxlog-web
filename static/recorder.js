@@ -1,6 +1,7 @@
-// core/static/app/js/recorder.js
 console.log("Recorder JS Loaded");
+
 document.addEventListener('DOMContentLoaded', () => {
+
     const recordButton = document.getElementById('recordButton');
     const stopButton = document.getElementById('stopButton');
     const audioPlayback = document.getElementById('audioPlayback');
@@ -10,6 +11,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const useRecordingButton = document.getElementById('useRecordingButton');
     const timerDisplay = document.getElementById('timer');
 
+    // ✅ Safety check (VERY IMPORTANT)
+    if (!recordButton || !stopButton) {
+        console.error("Buttons not found in DOM");
+        return;
+    }
+
     let mediaRecorder;
     let audioChunks = [];
     let recordedBlob = null;
@@ -18,8 +25,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function formatTime(totalSeconds) {
         const minutes = Math.floor(totalSeconds / 60);
-        const seconds = totalSeconds % 60;
-        return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        const secs = totalSeconds % 60;
+        return `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
     }
 
     function startTimer() {
@@ -35,92 +42,103 @@ document.addEventListener('DOMContentLoaded', () => {
         clearInterval(timerInterval);
     }
 
-    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        recordButton.addEventListener('click', async () => {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                mediaRecorder = new MediaRecorder(stream);
+    // ✅ Check browser support
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        recordingStatus.textContent = "Audio recording not supported in this browser.";
+        recordButton.disabled = true;
+        stopButton.disabled = true;
+        return;
+    }
 
-                mediaRecorder.ondataavailable = event => {
+    // 🎤 RECORD BUTTON
+    recordButton.addEventListener('click', async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+            mediaRecorder = new MediaRecorder(stream);
+
+            audioChunks = [];
+
+            mediaRecorder.ondataavailable = (event) => {
+                if (event.data.size > 0) {
                     audioChunks.push(event.data);
-                };
+                }
+            };
 
-                mediaRecorder.onstart = () => {
-                    recordButton.disabled = true;
-                    stopButton.disabled = false;
-                    recordButton.classList.add('recording');
-                    stopButton.classList.add('recording');
-                    recordingStatus.textContent = "Recording...";
-                    audioPlaybackContainer.style.display = 'none';
-                    audioChunks = []; // Reset chunks for new recording
-                    recordedBlob = null;
-                    audioFileInput.value = ''; // Clear file input if user records
-                    startTimer();
-                };
+            mediaRecorder.onstart = () => {
+                recordButton.disabled = true;
+                stopButton.disabled = false;
+                recordingStatus.textContent = "Recording...";
+                audioPlaybackContainer.style.display = 'none';
+                audioFileInput.value = '';
+                startTimer();
+            };
 
-                mediaRecorder.onstop = () => {
-                    recordButton.disabled = false;
-                    stopButton.disabled = true;
-                    recordButton.classList.remove('recording');
-                    stopButton.classList.remove('recording');
-                    recordingStatus.textContent = "Recording finished. Preview below.";
-                    stopTimer();
+            mediaRecorder.onstop = () => {
+                recordButton.disabled = false;
+                stopButton.disabled = true;
+                recordingStatus.textContent = "Recording finished.";
+                stopTimer();
 
-                    recordedBlob = new Blob(audioChunks, { type: 'audio/wav' }); // You can change type, e.g., 'audio/webm' or 'audio/ogg'
-                    const audioUrl = URL.createObjectURL(recordedBlob);
-                    audioPlayback.src = audioUrl;
-                    audioPlaybackContainer.style.display = 'block';
-                };
-                
-                mediaRecorder.start();
+                // ✅ Use better format (webm works better than wav in browsers)
+                recordedBlob = new Blob(audioChunks, { type: 'audio/webm' });
 
-            } catch (err) {
-                console.error("Error accessing microphone:", err);
-                recordingStatus.textContent = "Error: Could not access microphone. " + err.message;
-                alert("Could not access microphone. Please ensure permission is granted and try again.");
+                const audioUrl = URL.createObjectURL(recordedBlob);
+                audioPlayback.src = audioUrl;
+
+                audioPlaybackContainer.style.display = 'block';
+            };
+
+            mediaRecorder.start();
+
+        } catch (err) {
+            console.error("Mic error:", err);
+            recordingStatus.textContent = "Microphone access denied.";
+            alert("Please allow microphone access.");
+        }
+    });
+
+    // 🛑 STOP BUTTON
+    stopButton.addEventListener('click', () => {
+        if (mediaRecorder && mediaRecorder.state === "recording") {
+            mediaRecorder.stop();
+        }
+    });
+
+    // ✅ USE RECORDING
+    if (useRecordingButton) {
+        useRecordingButton.addEventListener('click', () => {
+            if (recordedBlob) {
+                const file = new File([recordedBlob], `recording_${Date.now()}.webm`, {
+                    type: 'audio/webm'
+                });
+
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                audioFileInput.files = dataTransfer.files;
+
+                recordingStatus.textContent = "Recording ready for upload!";
+                alert("Recording added successfully!");
+            } else {
+                recordingStatus.textContent = "No recording available.";
             }
         });
+    }
 
-        stopButton.addEventListener('click', () => {
+    // 📁 FILE SELECT
+    audioFileInput.addEventListener('change', () => {
+        if (audioFileInput.files.length > 0) {
+            recordingStatus.textContent = "File selected.";
+            audioPlaybackContainer.style.display = 'none';
+            recordedBlob = null;
+
             if (mediaRecorder && mediaRecorder.state === "recording") {
                 mediaRecorder.stop();
             }
-        });
 
-        useRecordingButton.addEventListener('click', () => {
-            if (recordedBlob) {
-                const audioFile = new File([recordedBlob], `recording_${Date.now()}.wav`, { type: 'audio/wav' });
-                
-                // Create a DataTransfer object to simulate a file selection
-                const dataTransfer = new DataTransfer();
-                dataTransfer.items.add(audioFile);
-                audioFileInput.files = dataTransfer.files;
+            stopTimer();
+            timerDisplay.textContent = "00:00";
+        }
+    });
 
-                recordingStatus.textContent = "Recording selected for upload.";
-                
-                alert("Recording selected! It will be uploaded when you submit the post.");
-            } else {
-                recordingStatus.textContent = "No recording available to use.";
-            }
-        });
-
-        // If user selects a file, clear any recording status
-        audioFileInput.addEventListener('change', () => {
-            if (audioFileInput.files.length > 0) {
-                recordingStatus.textContent = "File selected for upload. Any recording will be ignored.";
-                audioPlaybackContainer.style.display = 'none';
-                recordedBlob = null; // Clear recorded blob if a file is chosen
-                 if (mediaRecorder && mediaRecorder.state === "recording") {
-                    mediaRecorder.stop(); // Stop recording if active
-                }
-                stopTimer();
-                timerDisplay.textContent = "00:00";
-            }
-        });
-
-    } else {
-        recordingStatus.textContent = "Audio recording is not supported by your browser.";
-        recordButton.disabled = true;
-        stopButton.disabled = true;
-    }
 });
